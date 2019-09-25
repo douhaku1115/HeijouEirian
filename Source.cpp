@@ -69,10 +69,10 @@ int main() {
 			if (!cells[y][x] == CELL_TYPE_BLOCK)
 				cells[y][x] = CELL_TYPE_POINT;
 		}
-	cells[SCREEN_HEIGHT / 2][SCREEN_WIDTH / 2] = CELL_TYPE_NONE;
+	//cells[SCREEN_HEIGHT / 2][SCREEN_WIDTH / 2] = CELL_TYPE_NONE;
 
-	aliens[0].x = SCREEN_HEIGHT / 2;
-	aliens[0].y = SCREEN_HEIGHT / 2;
+	aliens[0].x = SCREEN_HEIGHT / 2+1;
+	aliens[0].y = SCREEN_HEIGHT / 2+1;
 
 	for (int i = 1; i < Alien_MAX; i++)
 		setFreePosition(&aliens[i].x, &aliens[i].y);
@@ -83,9 +83,9 @@ int main() {
 		for (int y = 0; y < SCREEN_HEIGHT; y++) {
 			for (int x = 0; x < SCREEN_WIDTH; x++) {
 				int alien = getMonster(x, y);
-				if(alien<0)
+				if (alien < 0)
 					printf(cellAA[cells[y][x]]);
-				else if(alien>0)
+				else if (alien > 0)
 					printf("ìG");
 				else
 					printf("Åó");
@@ -93,7 +93,25 @@ int main() {
 			printf("\n");
 		}
 
+
+		int x = aliens[0].x;
+		int y = aliens[0].y;
+
+		switch (_getch()) {
+		case 'w':y--; break;
+		case 's':y++; break;
+		case 'a':x--; break;
+		case 'd':x++; break;
+		}
+		switch (cells[y][x]) {
+		case CELL_TYPE_BLOCK:
+			break;
+		default:
+			aliens[0].x = x;
+			aliens[0].y = y;
+			break;
+		}
 	}
 
-	_getch();
+	
 }
