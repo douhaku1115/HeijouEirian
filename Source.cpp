@@ -1,4 +1,4 @@
-#include <stdio.h>
+Ôªø#include <stdio.h>
 #include <stdlib.h>
 #include <conio.h>
 #include <time.h>
@@ -12,9 +12,9 @@ enum {
 	CELL_TYPE_MAX
 };
 char cellAA[][2 + 1] = {
-	"Å@",//CELL_TYPE_NONE,
-	"Å°",//CELL_TYPE_BLOCK,
-	"ÅE"//CELL_TYPE_POINT
+	"„ÄÄ",//CELL_TYPE_NONE,
+	"‚ñ†",//CELL_TYPE_BLOCK,
+	"„Éª"//CELL_TYPE_POINT
 };
 int cells[SCREEN_HEIGHT][SCREEN_WIDTH];
 typedef struct {
@@ -36,7 +36,7 @@ void setFreePosition(int* pX, int* pY) {
 		switch (cells[y][x]) {
 		case CELL_TYPE_BLOCK:
 			break;
-			default:
+		default:
 		{
 			int monster = getMonster(x, y);
 			if (monster < 0) {
@@ -51,12 +51,12 @@ void setFreePosition(int* pX, int* pY) {
 }
 int main() {
 
-	for (int y=0 ;y<SCREEN_HEIGHT;y+=SCREEN_HEIGHT-1)
-		for (int x=0; x < SCREEN_WIDTH; x++) {
+	for (int y = 0; y < SCREEN_HEIGHT; y += SCREEN_HEIGHT - 1)
+		for (int x = 0; x < SCREEN_WIDTH; x++) {
 			cells[y][x] = CELL_TYPE_BLOCK;
 		}
 	for (int y = 0; y < SCREEN_HEIGHT; y++)
-		for (int x = 0; x < SCREEN_WIDTH; x+=SCREEN_WIDTH-1) {
+		for (int x = 0; x < SCREEN_WIDTH; x += SCREEN_WIDTH - 1) {
 			cells[y][x] = CELL_TYPE_BLOCK;
 		}
 	for (int y = 0; y < SCREEN_HEIGHT; y++)
@@ -71,13 +71,13 @@ int main() {
 		}
 	//cells[SCREEN_HEIGHT / 2][SCREEN_WIDTH / 2] = CELL_TYPE_NONE;
 
-	aliens[0].x = SCREEN_HEIGHT / 2+1;
-	aliens[0].y = SCREEN_HEIGHT / 2+1;
+	aliens[0].x = SCREEN_HEIGHT / 2 + 1;
+	aliens[0].y = SCREEN_HEIGHT / 2 + 1;
 
 	for (int i = 1; i < Alien_MAX; i++)
 		setFreePosition(&aliens[i].x, &aliens[i].y);
 
-	
+
 	while (1) {
 		system("cls");
 		for (int y = 0; y < SCREEN_HEIGHT; y++) {
@@ -86,9 +86,9 @@ int main() {
 				if (alien < 0)
 					printf(cellAA[cells[y][x]]);
 				else if (alien > 0)
-					printf("ìG");
+					printf("Êïµ");
 				else
-					printf("Åó");
+					printf("Ôº†");
 			}
 			printf("\n");
 		}
@@ -113,5 +113,5 @@ int main() {
 		}
 	}
 
-	
+
 }
