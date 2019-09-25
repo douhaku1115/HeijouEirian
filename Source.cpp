@@ -5,6 +5,9 @@
 #define SCREEN_WIDTH 13
 #define SCREEN_HEIGHT 13
 #define Alien_MAX 4
+#define POINT 10
+
+int point = 0;
 enum {
 	CELL_TYPE_NONE,
 	CELL_TYPE_BLOCK,
@@ -15,7 +18,7 @@ char cellAA[][2 + 1] = {
 	"　",//CELL_TYPE_NONE,
 	"■",//CELL_TYPE_BLOCK,
 	"・"//CELL_TYPE_POINT
-};
+	};
 int cells[SCREEN_HEIGHT][SCREEN_WIDTH];
 typedef struct {
 	int x, y;
@@ -92,9 +95,9 @@ int main() {
 			}
 			printf("\n");
 		}
+		printf("point %d", point);
 
-
-		int x = aliens[0].x;
+		int x = aliens[0].x;//ｘ座標
 		int y = aliens[0].y;
 
 		switch (_getch()) {
@@ -106,12 +109,16 @@ int main() {
 		switch (cells[y][x]) {
 		case CELL_TYPE_BLOCK:
 			break;
+		case CELL_TYPE_POINT:
+			cells[y][x] = CELL_TYPE_NONE;
+			point += POINT;
 		default:
 			aliens[0].x = x;
 			aliens[0].y = y;
 			break;
-		}
 	}
 
 
+}
+	
 }
