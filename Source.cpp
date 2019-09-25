@@ -12,9 +12,9 @@ enum {
 	CELL_TYPE_MAX
 };
 char cellAA[][2 + 1] = {
-	"�@",//CELL_TYPE_NONE,
-	"��",//CELL_TYPE_BLOCK,
-	"�E"//CELL_TYPE_POINT
+	"@",//CELL_TYPE_NONE,
+	"¡",//CELL_TYPE_BLOCK,
+	"E"//CELL_TYPE_POINT
 };
 int cells[SCREEN_HEIGHT][SCREEN_WIDTH];
 typedef struct {
@@ -86,16 +86,16 @@ int main() {
 				if (alien < 0)
 					printf(cellAA[cells[y][x]]);
 				else if (alien > 0)
-					printf("�G");
+					printf("“G");
 				else
-					printf("��");
+					printf("—");
 			}
 			printf("\n");
 		}
 
 
-		int x = aliens[0].x;
-		int y = aliens[0].y;
+		int x = aliens[0].x;//ｘ座標
+		int y = aliens[0].y;　//ｙ座標
 
 		switch (_getch()) {
 		case 'w':y--; break;
