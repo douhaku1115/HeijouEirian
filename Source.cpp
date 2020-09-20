@@ -5,14 +5,9 @@
 #define SCREEN_WIDTH 13
 #define SCREEN_HEIGHT 13
 #define POINT 10
-#define SHOT_MAX 5
+#define BOMB_MAX 
 
-typedef struct {
-	int x, y;
-	bool state;
 
-}SHOT;
-SHOT shots[SHOT_MAX];
 enum {
 	OFF,
 	ON,
@@ -23,7 +18,12 @@ enum {
 	CELL_TYPE_BLOCK,
 	CELL_TYPE_POINT,
 	CELL_TYPE_SHOT,
+	CELL_TYPE_SHOK,
 	CELL_TYPE_MAX
+};
+enum {
+	LIVE,
+	Asphyxia
 };
 enum {
 	DIRECTION_NORTH,
@@ -49,17 +49,26 @@ char cellAA[][2 + 1] = {
 	"　",//CELL_TYPE_NONE,
 	"■",//CELL_TYPE_BLOCK,
 	"・",//CELL_TYPE_POINT
-	"○"
+	"○",  //CELL_TYPE_SHOT
+	"👨" //CELL_TYPE_SHOK
 	};
 int cells[SCREEN_HEIGHT][SCREEN_WIDTH];
+
 typedef struct {
 	int x, y;
 	int directions;
+	int shot;
+	int time;
+	bool state;
 }Alien;
 
 Alien aliens[Alien_MAX];
 
-
+typedef struct {
+	int x, y;
+	int count;
+}bombs;
+bombs bomb[BOMB_MAX];
 
 int getMonster(int _x, int _y) {
 	for (int i = 0; i < Alien_MAX; i++)
@@ -87,20 +96,7 @@ void setFreePosition(int* pX, int* pY) { //初期エイリアン配置
 	}
 
 }
-int getShot(int _x, int _y) {
-	for (int i = 0; i < SHOT_MAX; i++)
-		if ((shots[i].x == _x) && (shots[i].y == _y))
-			return i;
-	return -1;
 
-}
-int getFreeShot() {
-	for (int i = 0; i < SHOT_MAX; i++) {
-		if (shots[i].state == 0)
-			return i;
-		return -1;
-	}
-}
 void init() {
 	srand((unsigned int)time(NULL));
 	
@@ -135,10 +131,9 @@ void display() {
 	system("cls");
 	for (int y = 0; y < SCREEN_HEIGHT; y++) {
 		for (int x = 0; x < SCREEN_WIDTH; x++) {
-			int shot_M = getShot(x, y);
+			
 			int alien = getMonster(x, y);
-			if (shot_M > 0)
-				printf("→");
+			
 			if (alien < 0)
 				printf(cellAA[cells[y][x]]);
 			else if (alien > MAN)
@@ -162,6 +157,7 @@ void gameOver() {
 }
 void alienMove() {
 	for (int i =MAN+ 1; i < Alien_MAX; i++) {  //Alienの移動
+		if(aliens[i].state==LIVE){
 		int x = aliens[i].x + directions[aliens[i].directions][0];
 		int y = aliens[i].y + directions[aliens[i].directions][1];
 	
@@ -171,6 +167,10 @@ void alienMove() {
 			aliens[i].y = y;
 			gameOver();
 		}
+		else if (cells[y][x] == CELL_TYPE_SHOK)//罠だったら変更
+		{
+			aliens[i].state = Asphyxia;
+		}
 		else if ((cells[y][x] == CELL_TYPE_BLOCK)//壁だったら変更
 			|| (alien > MAN)) {
 
@@ -179,6 +179,7 @@ void alienMove() {
 		else {
 			aliens[i].x = x;
 			aliens[i].y = y;
+		}
 		}
 	}
 	
@@ -203,14 +204,8 @@ int main() {
 		case 's':y++; break;
 		case 'a':x--; break;
 		case 'd':x++; break;
-		case 'm':
-			int shot = getFreeShot();
-			if (shot >= 0) {
-				shots[shot].x = aliens[0].x;
-				shots[shot].y = aliens[0].y;
-				shots[shot].state = 1;
-				//printf("→");
-			}break;
+		case 'm':cells[y][x] = CELL_TYPE_SHOT;
+					  break;
 			display();
 		}
 		switch (cells[y][x]) {
@@ -219,6 +214,7 @@ int main() {
 		case CELL_TYPE_POINT:
 			cells[y][x] = CELL_TYPE_NONE;
 			point += POINT;
+		case CELL_TYPE_SHOT:
 		default:
 			aliens[0].x = x;
 			aliens[0].y = y;
