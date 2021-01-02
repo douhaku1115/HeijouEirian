@@ -150,32 +150,33 @@ int getBomb(int _x, int _y) {   //座標に爆弾があるかないか
 void display() {
 	system("cls");
 	for (int i = 0; i < Alien_MAX; i++)
-	for (int y = 0; y < SCREEN_HEIGHT; y++) {
-		for (int x = 0; x < SCREEN_WIDTH; x++) 
+		for (int y = 0; y < SCREEN_HEIGHT; y++) {
+			for (int x = 0; x < SCREEN_WIDTH; x++)
 			{
-			int alien = getMonster(x, y);
-			int bomb = getBomb(x, y);
+				int alien = getMonster(x, y);
+				int bomb = getBomb(x, y);
 
-			if (alien > 0)
-				printf("敵");
-				
-			else if (alien > MAN && aliens[i].shock == 1) 
-									printf("寝");
-			
-			
-			else if (alien == MAN)
-				printf("＠");
-			else if (bomb >= 0) {
-				printf("○");
+				if (alien > 0 && aliens[i].shock == LIVE)
+					printf("敵");
+
+				else if (alien > MAN && aliens[i].shock == Asphyxia)
+					printf("寝");
+
+
+				else if (alien == MAN)
+					printf("＠");
+				else if (bomb >= 0) {
+					printf("○");
+				}
+				else
+					printf(cellAA[cells[y][x]]);
 			}
-			else
-				printf(cellAA[cells[y][x]]);
+			printf("\n");
 		}
-		printf("\n");
-	}
 	printf("point  %d", point);
 
 }
+
 void gameOver() {
 	aliens[MAN].x = -1;
 	aliens[MAN].y = -1;
@@ -185,38 +186,41 @@ void gameOver() {
 	exit(0);
 }
 void alienMove() {
-	for (int i =MAN+ 1; i < Alien_MAX; i++) {  //Alienの移動
-		if(aliens[i].shock==LIVE){
-		int x = aliens[i].x + directions[aliens[i].directions][0];
-		int y = aliens[i].y + directions[aliens[i].directions][1];
-	
-		int alien = getMonster(x, y);
-		if (alien == MAN) {
-			aliens[i].x = x;
-			aliens[i].y = y;
-			gameOver();
-		}
-		else if (cells[y][x] == CELL_TYPE_SHOT1)//罠だったら変更
-		{
-			//cells[y][x] == CELL_TYPE_SHOK;
-			aliens[i].shock= Asphyxia;
-			aliens[i].x = x;
-			aliens[i].y = y;
-			
-		}
-		else if ((cells[y][x] == CELL_TYPE_BLOCK)//壁だったら変更
-			|| (alien > MAN)) {
+	for (int i = MAN + 1; i < Alien_MAX; i++) {  //Alienの移動
+		if (aliens[i].shock == LIVE) {
+			int x = aliens[i].x + directions[aliens[i].directions][0];
+			int y = aliens[i].y + directions[aliens[i].directions][1];
 
-			aliens[i].directions = rand() % DIRECTION_MAX;
-		}
-		else {
-			aliens[i].x = x;
-			aliens[i].y = y;
-		}
+			int alien = getMonster(x, y);
+			int bomb = getBomb(x, y);
+			if (alien == MAN) {
+				aliens[i].x = x;
+				aliens[i].y = y;
+				gameOver();
+			}
+			else if (bomb > 0) {
+				aliens[i].shock = Asphyxia;
+				aliens[i].x = x;
+				aliens[i].y = y;
+
+			}
+
+
+			else if ((cells[y][x] == CELL_TYPE_BLOCK)//壁だったら変更
+				|| (alien > MAN)) {
+
+				aliens[i].directions = rand() % DIRECTION_MAX;
+			}
+			else {
+				aliens[i].x = x;
+				aliens[i].y = y;
+			}
 		}
 	}
-	
+	display();
 }
+
+
 int getFreeBomb() {
 	for (int i = 0; i<BOMB_MAX; i++) 
 		if (bombs[i].count <= 0)
@@ -262,7 +266,7 @@ int main() {
 			point += POINT;
 			aliens[0].x = x;
 			aliens[0].y = y; break;
-		case CELL_TYPE_SHOT1:break;
+		//case CELL_TYPE_SHOT1:break;
 		default:
 			aliens[0].x = x;
 			aliens[0].y = y; break;
