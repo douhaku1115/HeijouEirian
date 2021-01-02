@@ -5,7 +5,8 @@
 #define SCREEN_WIDTH 13
 #define SCREEN_HEIGHT 13
 #define POINT 10
-#define BOMB_MAX 
+#define BOMB_MAX 5
+#define BOMB_COUNT_MAX 10
 
 
 enum {
@@ -17,13 +18,16 @@ enum {
 	CELL_TYPE_NONE,
 	CELL_TYPE_BLOCK,
 	CELL_TYPE_POINT,
-	CELL_TYPE_SHOT,
+	CELL_TYPE_SHOT1,
+	CELL_TYPE_SHOT2,
+	CELL_TYPE_SHOT3,
 	CELL_TYPE_SHOK,
 	CELL_TYPE_MAX
 };
 enum {
 	LIVE,
-	Asphyxia
+	Asphyxia,
+	Death
 };
 enum {
 	DIRECTION_NORTH,
@@ -57,9 +61,9 @@ int cells[SCREEN_HEIGHT][SCREEN_WIDTH];
 typedef struct {
 	int x, y;
 	int directions;
-	int shot;
-	int time;
-	bool state;
+	int count;// 打たれた回数
+	int time;//捕まっている時間
+	bool shock;
 }Alien;
 
 Alien aliens[Alien_MAX];
@@ -67,8 +71,8 @@ Alien aliens[Alien_MAX];
 typedef struct {
 	int x, y;
 	int count;
-}bombs;
-bombs bomb[BOMB_MAX];
+}bomb;
+bomb bombs[BOMB_MAX];
 
 int getMonster(int _x, int _y) {
 	for (int i = 0; i < Alien_MAX; i++)
@@ -96,10 +100,17 @@ void setFreePosition(int* pX, int* pY) { //初期エイリアン配置
 	}
 
 }
+void counter_mainasu() {
+	for (int i = 0; i < BOMB_MAX; i++) {
+		if (bombs[i].count <= 0)
+			continue;
+		bombs[i].count--;
+	}
+}
 
 void init() {
 	srand((unsigned int)time(NULL));
-	
+
 
 	for (int y = 0; y < SCREEN_HEIGHT; y += SCREEN_HEIGHT - 1)
 		for (int x = 0; x < SCREEN_WIDTH; x++) {
@@ -125,22 +136,40 @@ void init() {
 	aliens[MAN].y = SCREEN_HEIGHT / 2 + 1;
 
 	for (int i = 1; i < Alien_MAX; i++)
-		setFreePosition(&aliens[i].x, &aliens[i].y);
+	{
+	aliens[i].shock = LIVE;  //生きている
+	setFreePosition(&aliens[i].x, &aliens[i].y);
+}
+}
+int getBomb(int _x, int _y) {   //座標に爆弾があるかないか
+	for (int i = 0; i < BOMB_MAX; i++)
+		if ((bombs[i].x == _x) && (bombs[i].y == _y)&&(bombs[i].count>0))
+			return i;
+	return -1;
 }
 void display() {
 	system("cls");
+	for (int i = 0; i < Alien_MAX; i++)
 	for (int y = 0; y < SCREEN_HEIGHT; y++) {
-		for (int x = 0; x < SCREEN_WIDTH; x++) {
-			
+		for (int x = 0; x < SCREEN_WIDTH; x++) 
+			{
 			int alien = getMonster(x, y);
-			
-			if (alien < 0)
-				printf(cellAA[cells[y][x]]);
-			else if (alien > MAN)
-				printf("敵");
+			int bomb = getBomb(x, y);
 
-			else
+			if (alien > 0)
+				printf("敵");
+				
+			else if (alien > MAN && aliens[i].shock == 1) 
+									printf("寝");
+			
+			
+			else if (alien == MAN)
 				printf("＠");
+			else if (bomb >= 0) {
+				printf("○");
+			}
+			else
+				printf(cellAA[cells[y][x]]);
 		}
 		printf("\n");
 	}
@@ -157,7 +186,7 @@ void gameOver() {
 }
 void alienMove() {
 	for (int i =MAN+ 1; i < Alien_MAX; i++) {  //Alienの移動
-		if(aliens[i].state==LIVE){
+		if(aliens[i].shock==LIVE){
 		int x = aliens[i].x + directions[aliens[i].directions][0];
 		int y = aliens[i].y + directions[aliens[i].directions][1];
 	
@@ -167,9 +196,13 @@ void alienMove() {
 			aliens[i].y = y;
 			gameOver();
 		}
-		else if (cells[y][x] == CELL_TYPE_SHOK)//罠だったら変更
+		else if (cells[y][x] == CELL_TYPE_SHOT1)//罠だったら変更
 		{
-			aliens[i].state = Asphyxia;
+			//cells[y][x] == CELL_TYPE_SHOK;
+			aliens[i].shock= Asphyxia;
+			aliens[i].x = x;
+			aliens[i].y = y;
+			
 		}
 		else if ((cells[y][x] == CELL_TYPE_BLOCK)//壁だったら変更
 			|| (alien > MAN)) {
@@ -184,6 +217,13 @@ void alienMove() {
 	}
 	
 }
+int getFreeBomb() {
+	for (int i = 0; i<BOMB_MAX; i++) 
+		if (bombs[i].count <= 0)
+			return i;
+	return -1;
+}
+
 int main() {
 	init();
 	time_t t = time(NULL);
@@ -193,7 +233,6 @@ int main() {
 		display();
 		if (time(NULL) > t) {
 			t = time(NULL);
-			display();
 		}
 		
 		int x = aliens[0].x;//ｘ座標
@@ -204,24 +243,33 @@ int main() {
 		case 's':y++; break;
 		case 'a':x--; break;
 		case 'd':x++; break;
-		case 'm':cells[y][x] = CELL_TYPE_SHOT;
-					  break;
+		case ' ':
+			int bomb = getFreeBomb();
+			if (bomb >= 0) {
+				bombs[bomb].x = aliens[0].x;
+			    bombs[bomb]. y= aliens[0].y;
+				bombs[bomb].count = BOMB_COUNT_MAX;
+				break;
+			}
 			display();
 		}
+
 		switch (cells[y][x]) {
 		case CELL_TYPE_BLOCK:
 			break;
 		case CELL_TYPE_POINT:
 			cells[y][x] = CELL_TYPE_NONE;
 			point += POINT;
-		case CELL_TYPE_SHOT:
+			aliens[0].x = x;
+			aliens[0].y = y; break;
+		case CELL_TYPE_SHOT1:break;
 		default:
 			aliens[0].x = x;
-			aliens[0].y = y;
-			break;
+			aliens[0].y = y; break;
 		}
+		counter_mainasu();
 		alienMove();
 
-}
+	}
 	
 }
