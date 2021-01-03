@@ -7,7 +7,7 @@
 #define POINT 10
 #define BOMB_MAX 5
 #define BOMB_COUNT_MAX 10
-
+#define BOMB_TIME_MAX 10
 
 enum {
 	OFF,
@@ -100,11 +100,17 @@ void setFreePosition(int* pX, int* pY) { //初期エイリアン配置
 	}
 
 }
-void counter_mainasu() {
+void 
+counter_mainasu() {
 	for (int i = 0; i < BOMB_MAX; i++) {
 		if (bombs[i].count <= 0)
 			continue;
 		bombs[i].count--;
+	}
+	for (int i = 0; i < Alien_MAX; i++) {
+		if (aliens[i].time<= 0)
+			continue;
+		aliens[i].time--;
 	}
 }
 
@@ -147,19 +153,22 @@ int getBomb(int _x, int _y) {   //座標に爆弾があるかないか
 			return i;
 	return -1;
 }
+bool Live() {
+	return 0;
+}
 void display() {
 	system("cls");
-	for (int i = 0; i < Alien_MAX; i++)
+	//for (int i = 0; i < Alien_MAX; i++)
 		for (int y = 0; y < SCREEN_HEIGHT; y++) {
 			for (int x = 0; x < SCREEN_WIDTH; x++)
 			{
 				int alien = getMonster(x, y);
 				int bomb = getBomb(x, y);
 
-				if (alien > 0 && aliens[i].shock == LIVE)
+				if (alien > MAN && aliens[alien].time<=0)
 					printf("敵");
 
-				else if (alien > MAN && aliens[i].shock == Asphyxia)
+				else if (alien > MAN && aliens[alien].time > 0)
 					printf("寝");
 
 
@@ -187,7 +196,7 @@ void gameOver() {
 }
 void alienMove() {
 	for (int i = MAN + 1; i < Alien_MAX; i++) {  //Alienの移動
-		if (aliens[i].shock == LIVE) {
+		if (aliens[i].time <= 0) {
 			int x = aliens[i].x + directions[aliens[i].directions][0];
 			int y = aliens[i].y + directions[aliens[i].directions][1];
 
@@ -198,14 +207,12 @@ void alienMove() {
 				aliens[i].y = y;
 				gameOver();
 			}
-			else if (bomb > 0) {
-				aliens[i].shock = Asphyxia;
+			else if (bomb >= 0) {
+				//aliens[i].shock = Asphyxia; //爆弾接触
+				aliens[i].time = BOMB_TIME_MAX;
 				aliens[i].x = x;
 				aliens[i].y = y;
-
 			}
-
-
 			else if ((cells[y][x] == CELL_TYPE_BLOCK)//壁だったら変更
 				|| (alien > MAN)) {
 
