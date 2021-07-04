@@ -9,6 +9,7 @@
 #define BOMB_COUNT_MAX 10
 #define BOMB_TIME_MAX 10
 
+//test
 enum {
 	OFF,
 	ON,
