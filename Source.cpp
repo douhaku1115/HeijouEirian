@@ -74,6 +74,18 @@ typedef struct {
 }bomb;
 bomb bombs[BOMB_MAX];
 
+bool isBombPlaced() {
+	for (int i = 0; i < BOMB_MAX; i++) {
+		if (bombs[i].count > 0)
+			return  true;
+	}
+}
+	bool isAlienSleep() {
+		for (int i = 0; i < Alien_MAX; i++) {
+			if (aliens[i].time > 0)
+				return true;
+		}
+	}
 int getMonster(int _x, int _y) {
 	for (int i = 0; i < Alien_MAX; i++)
 		if ((aliens[i].x == _x) && (aliens[i].y == _y))
@@ -108,7 +120,7 @@ counter_mainasu() {
 		bombs[i].count--;
 	}
 	for (int i = 0; i < Alien_MAX; i++) {
-		if (aliens[i].time<= 0)
+		if (aliens[i].time <= 0)
 			continue;
 		aliens[i].time--;
 	}
@@ -149,7 +161,7 @@ void init() {
 }
 int getBomb(int _x, int _y) {   //座標に爆弾があるかないか
 	for (int i = 0; i < BOMB_MAX; i++)
-		if ((bombs[i].x == _x) && (bombs[i].y == _y)&&(bombs[i].count>0))
+		if ((bombs[i].x == _x) && (bombs[i].y == _y)&& isBombPlaced())
 			return i;
 	return -1;
 }
